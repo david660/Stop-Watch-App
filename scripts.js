@@ -33,9 +33,9 @@ var lastLap={mins:0, secs:0, hrs:0, mls:0};// to save the former lap time values
 function lapTimer() {
 // the seconds, minutes and hours variables are from getToShowTime function
     let lapMilli;
-    if (milliseconds < lastLap.mls) {
-        seconds-=1;
-        lapMilli = milliseconds + 100 - lastLap.mls;
+    if ((milliseconds < lastLap.mls) && (seconds > 0)) {
+        seconds--;
+        lapMilli = milliseconds - lastLap.mls + 100;
     }
     else {
         lapMilli = milliseconds - lastLap.mls;
@@ -43,24 +43,24 @@ function lapTimer() {
     
     let lapSeconds;
     if ((seconds < lastLap.secs) && (minutes>0)) {
-        minutes-=1;
-        lapSeconds= parseInt(seconds) - lastLap.secs + 60;
+        lapSeconds= 60 - lastLap.secs + seconds;
+        minutes--;
     }
+
     else {
         lapSeconds=seconds-lastLap.secs;
     }
 
     let lapMinutes;
-    if (minutes < lapMinutes) {
-        hours-=1;
-        minutes= parseInt(minutes) + 60;
-        lapMinutes= minutes - lastLap.mins;
+    if ((minutes < lastLap.mins) && (hours >0)) {
+        hours--;
+        lapMinutes= parseInt(minutes) - lastLap.mins + 60;
     }
     else {
-        lapMinutes = minutes - lastLap.mins;
+        lapMinutes = parseInt(minutes) - lastLap.mins;
     }
 
-    let lapHours=hours - lastLap.hrs;
+    let lapHours=parseInt(hours) - lastLap.hrs;
 
     if(lapSeconds < 10) {
         lapSeconds= "0" + lapSeconds;
@@ -72,6 +72,10 @@ function lapTimer() {
     if (lapHours < 10) {
         lapHours = "0" + lapHours;
     }
+    if (lapMilli < 10) {
+        lapMilli = "0" + lapMilli;
+    }
+
     lastLap = {
         //saving the former value of minutes and seconds
         mins:minutes,
@@ -139,7 +143,7 @@ function getToShowTime() {
 function startTimer() {
     if(!running){
         startTime = new Date().getTime();
-        tInterval = setInterval(getToShowTime, 1);
+        tInterval = setInterval(getToShowTime, 10);
       // change 1 to 1000 above to run script every second instead of every millisecond. one other change will be needed in the getShowTime() function below for this to work. see comment there.   
         
     paused = 0;
@@ -187,7 +191,11 @@ resetButton.addEventListener('click',function(){
     savedTime = 0;
     running = 0;
     paused = 0;
-    timerDisplay.innerHTML = "00:00:00";
+    lastLap.mls = 0;
+    lastLap.secs=0;
+    lastLap.mins=0;
+    lastLap.hrs=0;
+    timerDisplay.innerHTML = "00:00:00:00";
     //stopButton.innerHTML = 'Stop';
     stopButton.style.display = "none";
     resetButton.style.display = "none";
